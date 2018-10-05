@@ -35,34 +35,34 @@ class DAneal:
 
         while self.Beta <= self.BetaMax:
             #update the Pcenters for all the points
-            itr = 1  #Put the F old here
-            while itr < 20:
-                for point in range(N):
-                    for center in range(self.k):
-                        curr_dist = (x[point]-centers[center,0])**2 + (y[point]-centers[center,1])**2
-                        num = np.exp(-self.Beta*curr_dist)
+            # itr = 1  #Put the F old here
+            # while itr < 20:
+            for point in range(N):
+                for center in range(self.k):
+                    curr_dist = (x[point]-centers[center,0])**2 + (y[point]-centers[center,1])**2
+                    num = np.exp(-self.Beta*curr_dist)
 
-                        denum = 0.0
-                        for i in range(self.k):
-                            dist = (x[point]-centers[i,0])**2 + (y[point]-centers[i,1])**2
-                            denum += np.exp(-self.Beta*dist)
-                            #print("the denumorator is")
-                            #print(denum)
-                        Pcenters[center,point] = num / denum
-
-
-                #update all centers
-                for j in range(self.k):
-                    Xcoord = 0.0
-                    Ycoord = 0.0
                     denum = 0.0
-                    for i in range(N):
-                        Xcoord += Pcenters[j,i] * x[i]
-                        Ycoord += Pcenters[j,i] * y[i]
-                        denum += Pcenters[j,i]
-                    centers[j,0] = Xcoord/denum + PERTURB*random.random()
-                    centers[j,1] = Ycoord/denum + PERTURB*random.random()
-                itr += 1
+                    for i in range(self.k):
+                        dist = (x[point]-centers[i,0])**2 + (y[point]-centers[i,1])**2
+                        denum += np.exp(-self.Beta*dist)
+                        #print("the denumorator is")
+                        #print(denum)
+                    Pcenters[center,point] = num / denum
+
+
+            #update all centers
+            for j in range(self.k):
+                Xcoord = 0.0
+                Ycoord = 0.0
+                denum = 0.0
+                for i in range(N):
+                    Xcoord += Pcenters[j,i] * x[i]
+                    Ycoord += Pcenters[j,i] * y[i]
+                    denum += Pcenters[j,i]
+                centers[j,0] = Xcoord/denum + PERTURB*random.random()
+                centers[j,1] = Ycoord/denum + PERTURB*random.random()
+                # itr += 1
 
             self.Beta *= self.alpha
         Pcenters = np.around(Pcenters)
@@ -73,11 +73,11 @@ class DAneal:
 #Import the data set
 rawData = pd.read_csv("ipl.csv")
 rawData = rawData[['one', 'two']]
-data = rawData.values
+data_arr = rawData.values
 
 #Create the object and pass the data in
 DA = DAneal(3, 0.001, 1000, 1.1)
-centers, Pcenters = DA.Anneal(data)
+centers, Pcenters = DA.Anneal(data_arr)
 print(Pcenters)
 
 colors = 10*["r", "g", "c", "b", "k"]
@@ -86,4 +86,6 @@ for centroid in range(DA.k):
 
 for cluster in range(DA.k):
     color = colors[cluster]
-    plt.scatter()
+    valid_X = data_arr[:,0][np.where(Pcenters[cluster] == 1)]
+    valid_Y = data_arr[:,1][np.where(Pcenters[cluster] == 1)]
+    plt.scatter(valid_X, valid_Y, color = color, s = 30)
