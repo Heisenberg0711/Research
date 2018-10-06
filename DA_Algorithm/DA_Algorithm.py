@@ -30,50 +30,70 @@ class DAneal:
             centers[i,0] = np.sum(x)/N
             centers[i,1] = np.sum(y)/N
 
-        print("The initial centers are")
-        print(centers)
-
         while self.Beta <= self.BetaMax:
             #update the Pcenters for all the points
-            # itr = 1  #Put the F old here
-            # while itr < 20:
-            for point in range(N):
-                for center in range(self.k):
-                    curr_dist = (x[point]-centers[center,0])**2 + (y[point]-centers[center,1])**2
-                    num = np.exp(-self.Beta*curr_dist)
+             itr = 1  #Put the F old here+
+             while itr < 20:
+                 #Updating the Pcenters
+                    # for point in range(N):
+                    #     for center in range(self.k):
+                    #         curr_dist = (x[point]-centers[center,0])**2 + (y[point]-centers[center,1])**2
+                    #         num = np.exp(-self.Beta*curr_dist)
+                    #
+                    #         denum = 0.0
+                    #         for i in range(self.k):
+                    #             dist = (x[point]-centers[i,0])**2 + (y[point]-centers[i,1])**2
+                    #             denum += np.exp(-self.Beta*dist)
+                    #
+                    #         Pcenters[center,point] = num / denum
 
-                    denum = 0.0
+                    Pcenters_new = np.zeros([self.k, N])
+                    for centroid in range(self.k):
+                        dist = data - np.tile(centers[centroid,:], (N, 1))
+                        dist = (dist[:,0]**2 + dist[:,1]**2).reshape(N, 1)
+                        dist = np.exp(-self.Beta * dist).reshape(1,N)
+                        Pcenters_new[centroid,:] = dist
+
+                    denum = np.sum(Pcenters)
                     for i in range(self.k):
-                        dist = (x[point]-centers[i,0])**2 + (y[point]-centers[i,1])**2
-                        denum += np.exp(-self.Beta*dist)
-                        #print("the denumorator is")
-                        #print(denum)
-                    Pcenters[center,point] = num / denum
+                        Pcenters[i,:] = Pcenters_new[i,:] / denum
 
 
-            #update all centers
-            for j in range(self.k):
-                Xcoord = 0.0
-                Ycoord = 0.0
-                denum = 0.0
-                for i in range(N):
-                    Xcoord += Pcenters[j,i] * x[i]
-                    Ycoord += Pcenters[j,i] * y[i]
-                    denum += Pcenters[j,i]
-                centers[j,0] = Xcoord/denum + PERTURB*random.random()
-                centers[j,1] = Ycoord/denum + PERTURB*random.random()
-                # itr += 1
+                    #update all centers
+                    # for j in range(self.k):
+                    #     Xcoord = 0.0
+                    #     Ycoord = 0.0
+                    #     denum = 0.0
+                    #     for i in range(N):
+                    #         Xcoord += Pcenters[j,i] * x[i]
+                    #         Ycoord += Pcenters[j,i] * y[i]
+                    #         denum += Pcenters[j,i]
+                    #     centers[j,0] = Xcoord/denum + PERTURB*random.random()
+                    #     centers[j,1] = Ycoord/denum + PERTURB*random.random()
 
-            self.Beta *= self.alpha
+
+                    for p in range(self.k):
+                        curr = Pcenters[p,:]
+                        pvalues = np.tile(curr, (2,1))
+                        multiply = pvalues * data.T
+                        centers[p,:] = np.sum(multiply, axis=1) / np.sum(curr)
+                    centers = centers + PERTURB*random.random()
+                    print(centers)
+                    itr += 1
+             self.Beta *= self.alpha
         Pcenters = np.around(Pcenters)
         return (centers, Pcenters)
 
 
 
 #Import the data set
-rawData = pd.read_csv("ipl.csv")
-rawData = rawData[['one', 'two']]
+df1 = pd.read_csv("Datasets/ipl.csv")
+df1 = df1[['one', 'two']]
 data_arr = rawData.values
+
+df2 = pd.read_table("Datasets/s1.txt", delim_whitespace=True, header=None).astype(float)
+df2 = df2 * 1e-4
+data_arr = df2.values
 
 #Create the object and pass the data in
 DA = DAneal(3, 0.001, 1000, 1.1)
