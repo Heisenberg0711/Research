@@ -17,21 +17,21 @@ class DAneal:
         N = data.shape[0];
 
         #Initialization
-        centers = np.ones((self.k, 2))
-        Pcenters = np.ones((self.k, N))
-
-        PERTURB = 0.001
-        STOP = 1e-4
+        centers = np.zeros((self.k, 2))
+        Pcenters = np.zeros((self.k, N))
 
         for i in range(self.k):
             centers[i,0] = np.sum(data[:,0])/N
             centers[i,1] = np.sum(data[:,1])/N
 
+        PERTURB = 0.001
+        STOP = 1e-4
+
         while self.Beta <= self.BetaMax:
 
             itr = 1  #Put the F old here+
             while itr < 20:
-                #Update the Pcenters
+                #Updating Pcenters
                 Pcenters_new = np.zeros([self.k, N])
                 for centroid in range(self.k):
                     dist = data - np.tile(centers[centroid,:], (N, 1))
@@ -43,7 +43,7 @@ class DAneal:
                 for i in range(self.k):
                     Pcenters[i,:] = Pcenters_new[i,:] / denum
 
-                #Update the centers
+                #Updating centers
                 for p in range(self.k):
                     curr = Pcenters[p,:]
                     pvalues = np.tile(curr, (2,1))
