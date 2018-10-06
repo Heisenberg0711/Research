@@ -20,7 +20,6 @@ class DAneal:
         centers = np.ones((self.k, 2))
         Pcenters = np.ones((self.k, N))
 
-        #PERTURB = 0.001*ones((self.k,2))
         PERTURB = 0.001
         STOP = 1e-4
 
@@ -29,21 +28,18 @@ class DAneal:
             centers[i,1] = np.sum(data[:,1])/N
 
         while self.Beta <= self.BetaMax:
-            #update the Pcenters for all the points
-            # itr = 1  #Put the F old here+
-            # while itr < 20:
+
+            itr = 1  #Put the F old here+
+            while itr < 20:
                 #Update the Pcenters
                 Pcenters_new = np.zeros([self.k, N])
                 for centroid in range(self.k):
                     dist = data - np.tile(centers[centroid,:], (N, 1))
                     dist = (dist[:,0]**2 + dist[:,1]**2).reshape(N, 1)
                     dist = np.exp(-self.Beta * dist).reshape(1,N)
-                    print("The distance matrix is:")
-                    print(dist)
                     Pcenters_new[centroid,:] = dist
-                #print(Pcenters)
 
-                denum = np.sum(Pcenters_new)
+                denum = np.sum(Pcenters_new,axis=0)
                 for i in range(self.k):
                     Pcenters[i,:] = Pcenters_new[i,:] / denum
 
@@ -52,45 +48,12 @@ class DAneal:
                     curr = Pcenters[p,:]
                     pvalues = np.tile(curr, (2,1))
                     multiply = pvalues * data.T
-                    centers[p,:] = np.sum(multiply, axis=1) / np.sum(curr)
+                    centers[p,:] = np.sum(multiply, axis=1).reshape(1,2) / np.sum(curr) + PERTURB*random.random()
 
-                centers = centers + PERTURB*random.random()
-                print("The updated center is:")
-                print(centers)
-
-                # itr += 1
-                self.Beta *= self.alpha
+                itr += 1
+            self.Beta *= self.alpha
         Pcenters = np.around(Pcenters)
         return (centers, Pcenters)
-
-
-
-
-#Updating the Pcenters
-    # for point in range(N):
-   #     for center in range(self.k):
-   #         curr_dist = (x[point]-centers[center,0])**2 + (y[point]-centers[center,1])**2
-   #         num = np.exp(-self.Beta*curr_dist)
-   #
-   #         denum = 0.0
-   #         for i in range(self.k):
-   #             dist = (x[point]-centers[i,0])**2 + (y[point]-centers[i,1])**2
-   #             denum += np.exp(-self.Beta*dist)
-   #
-   #         Pcenters[center,point] = num / denum
-
-#update all centers
-# for j in range(self.k):
-#     Xcoord = 0.0
-#     Ycoord = 0.0
-#     denum = 0.0df1 = pd.read_csv("Datasets/ipl.csv")
-
-#     for i in range(N):
-#         Xcoord += Pcenters[j,i] * x[i]
-#         Ycoord += Pcenters[j,i] * y[i]
-#         denum += Pcenters[j,i]
-#     centers[j,0] = Xcoord/denum + PERTURB*random.random()
-#     centers[j,1] = Ycoord/denum + PERTURB*random.random()
 
 
 #Import the data set
