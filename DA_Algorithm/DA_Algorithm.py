@@ -27,12 +27,22 @@ class DAneal:
         PERTURB = 0.001
         STOP = 1e-4
 
-        dist_init = data - np.tile()
-        F_init = (-1/self.Beta) * np.sum()
         while self.Beta <= self.BetaMax:
 
-            itr = 1  #Put the F old here+
-            while itr < 20:
+            F_total_old = np.ones([self.k, 1])
+            for centroid in range(self.k):
+                dist = data - np.tile(centers[centroid,:], (N, 1))
+                dist = (dist[:,0]**2 + dist[:,1]**2).reshape(N, 1)
+                dist = np.exp(-self.Beta * dist).reshape(1,N)
+                F_total_old[centroid] = np.log10(np.sum(dist))
+
+            F_old = (-1/self.Beta) * np.sum(F_total_old)
+            #F_old = float("inf")
+            F_new = F_old + 9999
+
+            while np.absolute((F_new - F_old) / F_old) > 1e-3:
+                print("Enters the loop")
+                F_old = F_new
                 #Updating Pcenters
                 Pcenters_new = np.zeros([self.k, N])
                 for centroid in range(self.k):
@@ -52,7 +62,16 @@ class DAneal:
                     multiply = pvalues * data.T
                     centers[p,:] = np.sum(multiply, axis=1).reshape(1,2) / np.sum(curr) + PERTURB*random.random()
 
-                itr += 1
+
+                F_total_new = np.ones([self.k, 1])
+                for centroid in range(self.k):
+                    dist = data - np.tile(centers[centroid,:], (N, 1))
+                    dist = (dist[:,0]**2 + dist[:,1]**2).reshape(N, 1)
+                    dist = np.exp(-self.Beta * dist).reshape(1,N)
+                    F_total_new[centroid] = np.log10(np.sum(dist))
+
+                F_new = (-1/self.Beta) * np.sum(F_total_new)
+
             self.Beta *= self.alpha
         Pcenters = np.around(Pcenters)
         return (centers, Pcenters)
@@ -69,7 +88,7 @@ data_arr = df2.values
 
 
 #Create the object and pass the data in
-DA = DAneal(3, 0.001, 1000, 1.1)
+DA = DAneal(15, 0.001, 1000, 1.1)
 centers, Pcenters = DA.Anneal(data_arr)
 print(Pcenters)
 
