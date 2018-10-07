@@ -27,6 +27,8 @@ class DAneal:
         PERTURB = 0.001
         STOP = 1e-4
 
+        dist_init = data - np.tile()
+        F_init = (-1/self.Beta) * np.sum()
         while self.Beta <= self.BetaMax:
 
             itr = 1  #Put the F old here+
